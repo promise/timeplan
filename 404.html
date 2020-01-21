@@ -11,7 +11,7 @@
 	<link rel="stylesheet" href="main.css">
 </head>
 <body>
-	<main style="background: #485564; color: #FAFAFA;">
+	<main id="mainbody" style="background: #485564; color: #FAFAFA;">
 		<div class="classtitle" id="classtitle">Laster...</div>
 		<div class="classtime" id="classtime"></div>
 		
@@ -19,11 +19,31 @@
 	
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script>
+		let colors = {
+			"Naturfag": "AADDAA",
+			"Kroppsøving": "AADDDD",
+			"Samfunnsfag": "DDCCAA",
+			"Norsk": "DDAAAA",
+			"Matematikk": "AAADDD",
+			"Engelsk": "DDDDAA",
+			"Valgfag": "DDAADD",
+			"Språk": "AACCDD",
+			"Kunst og håndverk": "CCDDAA",
+			"Utdanningsvalg": "BAAADD",
+			"Musikk": "BEAADD",
+			"Mat og helse": "DDAACA",
+			"KRLE": "DDCCAA",
+			"Friminutt": "DDDDDD",
+			"Vanilla": "AAAAAA",
+			"Feil": "FF9999"
+		}, otherColors = "background: #485564; color: #"
+
 		let data = { loading: true }, classMatches = window.location.pathname.match(/[0-9][0-9]?[A-E]/gmi), thisclass = classMatches ? classMatches[0] : null;
 
 		if (!thisclass) setTimeout(() => {
 			document.getElementById('classtitle').innerText = "Noe gikk galt ..."
 			document.getElementById('classtime').innerText = "Dette klasserommet eksisterer ikke!"
+			document.getElementById('mainbody').style = otherColors + colors.Feil
 			return;
 		}, 500); else fetchData() && setInterval(fetchData, 60000);
 
@@ -34,12 +54,16 @@
 				dataType: 'json',
 				success: raw => {
 					data = raw;
-					update();
-					setInterval(update, 1000);
+					update(); // vi oppdaterer så raskt som mulig
+					setTimeout(fetchData, 300000) // hvis ukeplanen endres vil vi ha endringene
 				},
-				error: () => {}
+				error: () => {
+					setTimeout(fetchData, 5000) // vi prøver på nytt
+				}
 			})
 		}
+		
+		setInterval(update, 1000); // vi oppdaterer hvert sekund
 
 		function update() {
 			if (data.loading) return;
@@ -51,6 +75,7 @@
 			if (!today) { // helg
 				document.getElementById('classtitle').innerText = "Det er helg 🎉"
 				document.getElementById('classtime').innerText = ""
+				document.getElementById('mainbody').style = otherColors + colors.Vanilla
 			} else { // ikke helg
 				let classnow = today.topics.find(t => t.timeStart < now && now < t.timeEnd)
 				if (!classnow) { // ikke time
@@ -59,6 +84,7 @@
 						for (let topic of today.topics) if (now < topic.timeEnd) {
 							document.getElementById('classtitle').innerText = "Friminutt! Neste er " + topic.name
 							document.getElementById('classtime').innerText = topic.time[0] + " - " + msToTime(topic.timeStart - now, true)
+							document.getElementById('mainbody').style = otherColors + colors.Friminutt
 							break;
 						}
 					} else { // ikke friminutt
@@ -66,6 +92,7 @@
 							let topic = today.topics[0]
 							document.getElementById('classtitle').innerText = "God morgen! Første time er " + topic.name
 							document.getElementById('classtime').innerText = topic.time[0] + " - " + msToTime(topic.timeStart - now, true)
+							document.getElementById('mainbody').style = otherColors + (colors[topic.name] || colors.Vanilla)
 						} else { // etter skolen
 							document.getElementById('classtitle').innerText = "God kveld!"
 							document.getElementById('classtime').innerText = ""
@@ -74,11 +101,12 @@
 				} else { // time
 					document.getElementById('classtitle').innerText = classnow.name
 					document.getElementById('classtime').innerText = msToTime(now - classnow.timeStart, true) + " - " + msToTime(classnow.timeEnd - now, true)
+					document.getElementById('mainbody').style = otherColors + (colors[topic.name] || colors.Vanilla)
 				}
 			}
 		}
 
-		function msToTime(ms, short = false){
+		function msToTime(ms, short = false) {
 			days = Math.floor(ms / 86400000); // 24*60*60*1000
 			daysms = ms % 86400000; // 24*60*60*1000
 			hours = Math.floor(daysms / 3600000); // 60*60*1000
