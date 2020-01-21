@@ -76,3 +76,7 @@ main > .classtime {
 	margin: 1.5rem 0;
 	font-weight: 100;
 }
+
+main > .classtime > a {
+	color: #8bcef8
+}

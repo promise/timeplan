@@ -18,13 +18,88 @@
 	</main>
 	
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	<script>		
-		$.ajax({
-			url: "https://skkvapi.glitch.me/timeplan/10D",
-			type: "GET",
-			dataType: 'jsonp',
-			success: data => { console.log(data); }
-		})
+	<script>
+		let data = { loading: true }, classMatches = window.location.pathname.match(/[0-9][0-9]?[A-E]/gmi), thisclass = classMatches ? classMatches[0] : null;
+
+		if (!thisclass) setTimeout(() => {
+			document.getElementById('classtitle').innerText = "Noe gikk galt ..."
+			document.getElementById('classtime').innerText = "Dette klasserommet eksisterer ikke!"
+			return;
+		}, 500); else fetchData() && setInterval(fetchData, 60000);
+
+		function fetchData() {
+			return $.ajax({
+				url: "https://skkvapi.glitch.me/timeplan/" + thisclass,
+				type: "GET",
+				dataType: 'json',
+				success: raw => {
+					data = raw
+				},
+				error: () => {
+					document.getElementById('classtitle').innerText = "Noe gikk galt ..."
+					document.getElementById('classtime').innerText = "Prøv igjen senere!"
+				}
+			})
+		}
+
+		function update() {
+			if (data.loading) return;
+
+			let date = new Date(), day = date.getDay() - 1, now = 1579613400000 + 1000//Date.now();
+			if (day == -1) day = 6;
+
+			let today = data.days[day];
+			if (!today) { // helg
+				document.getElementById('classtitle').innerText = "Det er helg 🎉"
+				document.getElementById('classtime').innerText = ""
+			} else { // ikke helg
+				let classnow = today.topics.find(t => t.timeStart < now && now < t.timeEnd)
+				if (!classnow) { // ikke time
+					let start = today.topics[0].timeStart, end = today.topics[today.topics.length - 1].timeEnd;
+					if (start < now && now < end) { // friminutt
+						for (let topic of today.topics) if (now < topic.timeEnd) {
+							document.getElementById('classtitle').innerText = "Friminutt! Neste er " + topic.name
+							document.getElementById('classtime').innerText = topic.time[0] + " - " + msToTime(topic.timeStart - now, true)
+							break;
+						}
+					} else { // ikke friminutt
+						if (start >= now) { // før skolen
+							let topic = today.topics[0]
+							document.getElementById('classtitle').innerText = "God morgen! Første time er " + topic.name
+							document.getElementById('classtime').innerText = topic.time[0] + " - " + msToTime(topic.timeStart - now, true)
+						} else { // etter skolen
+							document.getElementById('classtitle').innerText = "God kveld!"
+							document.getElementById('classtime').innerText = ""
+						}
+					}
+				} else { // time
+					document.getElementById('classtitle').innerText = classnow.name
+					document.getElementById('classtime').innerText = msToTime(now - classnow.timeStart, true) + " - " + msToTime(classnow.timeEnd - now, true)
+				}
+			}
+		}
+
+		setInterval(update, 1000);
+
+		function msToTime(ms, short = false){
+			days = Math.floor(ms / 86400000); // 24*60*60*1000
+			daysms = ms % 86400000; // 24*60*60*1000
+			hours = Math.floor(daysms / 3600000); // 60*60*1000
+			hoursms = ms % 3600000; // 60*60*1000
+			minutes = Math.floor(hoursms / 60000); // 60*1000
+			minutesms = ms % 60000; // 60*1000
+			sec = Math.floor(minutesms / 1000);
+
+			let times = [];
+			if (days) times.push(days + " dager")
+			if (hours) times.push(hours + " timer")
+			if (minutes) times.push(minutes + (short ? " min" : " minutter"))
+			if (sec) times.push(sec + (short ? " sek" : " sekunder"))
+
+			if (!times.length) times.push(0 + (short ? " sek" : " sekunder"))
+
+			return times.join(", ")
+		}
 	</script>
 </body>
 </html>
