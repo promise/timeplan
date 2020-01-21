@@ -46,7 +46,7 @@
 		function update() {
 			if (data.loading) return;
 
-			let date = new Date(), day = date.getDay() - 1, now = 1579613400000 + 1000//Date.now();
+			let date = new Date(), day = date.getDay() - 1, now = Date.now();
 			if (day == -1) day = 6;
 
 			let today = data.days[day];
