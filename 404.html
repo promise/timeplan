@@ -33,13 +33,11 @@
 				type: "GET",
 				dataType: 'json',
 				success: raw => {
-					data = raw
+					data = raw;
 					update();
+					setInterval(update, 1000);
 				},
-				error: () => {
-					document.getElementById('classtitle').innerText = "Noe gikk galt ..."
-					document.getElementById('classtime').innerText = "Prøv igjen senere!"
-				}
+				error: () => {}
 			})
 		}
 
@@ -79,8 +77,6 @@
 				}
 			}
 		}
-
-		setInterval(update, 1000);
 
 		function msToTime(ms, short = false){
 			days = Math.floor(ms / 86400000); // 24*60*60*1000
