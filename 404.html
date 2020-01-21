@@ -34,6 +34,7 @@
 				dataType: 'json',
 				success: raw => {
 					data = raw
+					update();
 				},
 				error: () => {
 					document.getElementById('classtitle').innerText = "Noe gikk galt ..."
