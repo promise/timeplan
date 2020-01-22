@@ -82,7 +82,7 @@
 				document.getElementById('nextclass').innerText = ""
 				document.getElementById('mainbody').style = otherColors + colors.Vanilla
 			} else { // ikke helg
-				document.getElementById('datetoday').innerText = today.title
+				document.getElementById('datetoday').innerText = today.title + ", uke " + ISO8601_week_no(new Date())
 				let classnow = today.topics.find(t => t.timeStart < now && now < t.timeEnd)
 				if (!classnow) { // ikke time
 					let start = today.topics[0].timeStart, end = today.topics[today.topics.length - 1].timeEnd;
@@ -136,6 +136,19 @@
 			if (!times.length) times.push(0 + (short ? " sek" : " sekunder"))
 
 			return times.join(", ")
+		}
+		
+		// https://ukeplan.lillestrom.kommune.no/js/site.js
+		function ISO8601_week_no(dt) {
+		    var tdt = new Date(dt.valueOf());
+		    var dayn = (dt.getDay() + 6) % 7;
+		    tdt.setDate(tdt.getDate() - dayn + 3);
+		    var firstThursday = tdt.valueOf();
+		    tdt.setMonth(0, 1);
+		    if (tdt.getDay() !== 4) {
+	            tdt.setMonth(0, 1 + ((4 - tdt.getDay()) + 7) % 7);
+		    }
+		    return 1 + Math.ceil((firstThursday - tdt) / 604800000);
 		}
 	</script>
 </body>
