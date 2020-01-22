@@ -1,152 +1,35 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<title>Timeplan, men den fungerer faktisk</title>
+		<title>Timeplan, men den fungerer faktisk</title>
 
-	<link href="https://fonts.googleapis.com/css?family=Reem+Kufi|Roboto:300" rel="stylesheet">
-	<link rel="stylesheet" href="main.css">
-</head>
-<body>
-	<main id="mainbody" style="background: #485564; color: #FAFAFA;">
-		<div class="details" id="datetoday"></div>
-		<div class="title" id="classtitle">Laster...</div>
-		<div class="details" id="messages"></div>
-		<div style="position:fixed;left:0;bottom:0;width:100%;text-align:right;">timeplan.but-it-actually.works - Laget av Glenn fra programmering</div>
-	</main>
-	
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	<script>
-		let colors = {
-			"Naturfag": "AADDAA",
-			"Kroppsøving": "AADDDD",
-			"Samfunnsfag": "DDCCAA",
-			"Norsk": "DDAAAA",
-			"Matematikk": "AAADDD",
-			"Engelsk": "DDDDAA",
-			"Valgfag": "DDAADD",
-			"Språk": "AACCDD",
-			"Kunst og håndverk": "CCDDAA",
-			"Utdanningsvalg": "BAAADD",
-			"Musikk": "BEAADD",
-			"Mat og helse": "DDAACA",
-			"KRLE": "DDCCAA",
-			"Friminutt": "DDDDDD",
-			"Vanilla": "AAAAAA",
-			"Feil": "FF9999"
-		}, otherColors = "background:#485564;color:#"
+		<link href="https://fonts.googleapis.com/css?family=Reem+Kufi|Roboto:300" rel="stylesheet">
+		<link rel="stylesheet" href="main.css">
 
-		let data = { loading: true }, classMatches = window.location.pathname.match(/[0-9][0-9]?[A-E]/gmi), thisclass = classMatches ? classMatches[0] : null;
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-153861801-5"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
 
-		if (!thisclass) setTimeout(() => {
-			document.getElementById('classtitle').innerText = "Noe gikk galt ..."
-			document.getElementById('classtime').innerText = "Dette klasserommet eksisterer ikke!"
-			document.getElementById('mainbody').style = otherColors + colors.Feil
-			return;
-		}, 500); else fetchData();
-
-		function fetchData() {
-			return $.ajax({
-				url: "https://skkvapi.but-it-actually.works/timeplan/" + thisclass,
-				type: "GET",
-				dataType: 'json',
-				success: raw => {
-					data = raw;
-					update(); // vi oppdaterer så raskt som mulig
-					setTimeout(fetchData, 60000) // hvis ukeplanen endres vil vi ha endringene
-				},
-				error: () => {
-					setTimeout(fetchData, 5000) // vi prøver på nytt
-				}
-			})
-		}
-		
-		setInterval(update, 1000); // vi oppdaterer hvert sekund
-
-		function update() {
-			if (data.loading) return;
-
-			let date = new Date(), day = date.getDay() - 1, now = Date.now();
-			if (day == -1) day = 6;
-
-			let today = data.days[day];
-			if (!today) { // helg
-				document.getElementById('datetoday').innerText = ""
-				document.getElementById('classtitle').innerText = "Det er helg 🎉"
-				document.getElementById('messages').innerText = ""
-				document.getElementById('mainbody').style = otherColors + colors.Vanilla
-			} else { // ikke helg
-				document.getElementById('datetoday').innerText = today.title + ", uke " + ISO8601_week_no(new Date())
-				let classnow = today.topics.find(t => t.timeStart < now && now < t.timeEnd)
-				if (!classnow) { // ikke time
-					let start = today.topics[0].timeStart, end = today.topics[today.topics.length - 1].timeEnd;
-					if (start < now && now < end) { // friminutt
-						for (let topic of today.topics) if (now < topic.timeEnd) {
-							document.getElementById('classtitle').innerText = "Friminutt!"
-							document.getElementById('messages').innerText = msToTime(topic.timeStart - now, true) + " til " + topic.name
-							document.getElementById('mainbody').style = otherColors + colors.Friminutt
-							break;
-						}
-					} else { // ikke friminutt
-						if (start >= now) { // før skolen
-							let topic = today.topics[0]
-							document.getElementById('classtitle').innerText = "God morgen! Første time er " + topic.name + " om " + msToTime(topic.timeStart - now, true)
-							document.getElementById('messages').innerHTML = data.messages.map(m => formatXML(m)).join("<br/>")
-							document.getElementById('mainbody').style = otherColors + (colors[topic.name] || colors.Vanilla)
-						} else { // etter skolen
-							document.getElementById('classtitle').innerText = day == 4 ? "God helg! 🎉" : "God kveld!"
-							let tomorrow = data.days[day + 1], homeworkTomorrow = tomorrow && tomorrow ? tomorrow.topics.map(t => t.homework.map(h => "<b>" + t.name + ":</b> " + formatXML(h))).flat(Infinity) : []
-							document.getElementById('messages').innerHTML = homeworkTomorrow.length ? "<b>Lekser til i morgen:</b><br/>" + homeworkTomorrow.join("<br/>") : ""
-							document.getElementById('mainbody').style = otherColors + colors.Vanilla
-						}
-					}
-				} else { // time
-					document.getElementById('classtitle').innerText = classnow.name
-					document.getElementById('messages').innerText = msToTime(now - classnow.timeStart, true) + " passert  -  " + msToTime(classnow.timeEnd - now, true) + (today.topics[today.topics.indexOf(classnow) + 1] ? " til " + today.topics[today.topics.indexOf(classnow) + 1].name : " gjenstår")
-					document.getElementById('mainbody').style = otherColors + (colors[classnow.name] || colors.Vanilla)
-				}
-			}
-		}
-
-		function msToTime(ms, short = false) {
-			days = Math.floor(ms / 86400000); // 24*60*60*1000
-			daysms = ms % 86400000; // 24*60*60*1000
-			hours = Math.floor(daysms / 3600000); // 60*60*1000
-			hoursms = ms % 3600000; // 60*60*1000
-			minutes = Math.floor(hoursms / 60000); // 60*1000
-			minutesms = ms % 60000; // 60*1000
-			sec = Math.floor(minutesms / 1000);
-
-			let times = [];
-			if (days) times.push(days + (days == 1 ? " dag" : " dager"))
-			if (hours) times.push(hours + (hours == 1 ? " time" : " timer"))
-			if (minutes) times.push(minutes + (short ? " min" : (minutes == 1 ? " minutt" : " minutter")))
-			if (sec && !(minutes || hours || days)) times.push(sec + (short ? " sek" : (sec == 1 ? " sekund" : " sekunder")))
-
-			if (!times.length) times.push(0 + (short ? " sek" : " sekunder"))
-
-			return times.join(", ")
-		}
-		
-		// https://ukeplan.lillestrom.kommune.no/js/site.js
-		function ISO8601_week_no(dt) {
-		    var tdt = new Date(dt.valueOf());
-		    var dayn = (dt.getDay() + 6) % 7;
-		    tdt.setDate(tdt.getDate() - dayn + 3);
-		    var firstThursday = tdt.valueOf();
-		    tdt.setMonth(0, 1);
-		    if (tdt.getDay() !== 4) {
-	            tdt.setMonth(0, 1 + ((4 - tdt.getDay()) + 7) % 7);
-		    }
-		    return 1 + Math.ceil((firstThursday - tdt) / 604800000);
-		}
-		
-		function formatXML(text) {
-			return text.replace(/</g, "&lt;").replace(/>/g, "$gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/&/g, "&amp;");
-		}
-	</script>
-</body>
+			gtag('config', 'UA-153861801-5');
+		</script>
+	</head>
+	<body>
+		<main style="background:#485564;color:#FAFAFA" id="mainbody">
+			<div class="details" id="datetoday"></div>
+			<div class="title" id="classtitle">Laster...</div>
+			<div class="details" id="messages"></div>
+			<div style="position:fixed;left:0;bottom:0;width:100%;text-align:right;">timeplan.but-it-actually.works - Laget av Glenn 10D fra programmering</div>
+		</main>
+		<script>
+			window.location.hash = "#" + window.location.pathname.replace("/", "");
+			window.location.pathname = "";
+		</script>
+	</body>
 </html>
