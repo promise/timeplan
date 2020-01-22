@@ -14,9 +14,7 @@
 	<main id="mainbody" style="background: #485564; color: #FAFAFA;">
 		<div class="details" id="datetoday"></div>
 		<div class="title" id="classtitle">Laster...</div>
-		<div class="details" id="classtime"></div>
-		<div class="details" id="classhomework"></div>
-		<div class="details" id="nextclass"></div>
+		<div class="details" id="messages"></div>
 	</main>
 	
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -77,9 +75,7 @@
 			if (!today) { // helg
 				document.getElementById('datetoday').innerText = ""
 				document.getElementById('classtitle').innerText = "Det er helg 🎉"
-				document.getElementById('classtime').innerText = ""
-				document.getElementById('classhomework').innerHTML = ""
-				document.getElementById('nextclass').innerText = ""
+				document.getElementById('messages').innerText = ""
 				document.getElementById('mainbody').style = otherColors + colors.Vanilla
 			} else { // ikke helg
 				document.getElementById('datetoday').innerText = today.title + ", uke " + ISO8601_week_no(new Date())
@@ -88,31 +84,27 @@
 					let start = today.topics[0].timeStart, end = today.topics[today.topics.length - 1].timeEnd;
 					if (start < now && now < end) { // friminutt
 						for (let topic of today.topics) if (now < topic.timeEnd) {
-							document.getElementById('classtitle').innerText = "Friminutt! Neste er " + topic.name
-							document.getElementById('classtime').innerText = topic.time[0] + " - " + msToTime(topic.timeStart - now, true)
-							document.getElementById('classhomework').innerHTML = topic.homework.map(h => h.replace(/</g, "&lt;").replace(/>/g, "$gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/&/g, "&amp;")).join("<br/>");
-							document.getElementById('nextclass').innerText = ""
+							document.getElementById('classtitle').innerText = "Friminutt!"
+							document.getElementById('messages').innerText = msToTime(topic.timeStart - now, true) + " til " + topic.name
 							document.getElementById('mainbody').style = otherColors + colors.Friminutt
 							break;
 						}
 					} else { // ikke friminutt
 						if (start >= now) { // før skolen
 							let topic = today.topics[0]
-							document.getElementById('classtitle').innerText = "God morgen! Første time er " + topic.name
-							document.getElementById('classtime').innerText = topic.time[0] + " - " + msToTime(topic.timeStart - now, true)
-							document.getElementById('classhomework').innerHTML = topic.homework.map(h => h.replace(/</g, "&lt;").replace(/>/g, "$gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/&/g, "&amp;")).join("<br/>");
+							document.getElementById('classtitle').innerText = "God morgen! Første time er " + topic.name + " om " + msToTime(topic.timeStart - now, true)
+							document.getElementById('messages').innerHTML = data.messages.map(m => formatXML(m)).join("<br/>")
 							document.getElementById('mainbody').style = otherColors + (colors[topic.name] || colors.Vanilla)
 						} else { // etter skolen
-							document.getElementById('classtitle').innerText = "God kveld!"
-							document.getElementById('classtime').innerText = ""
+							document.getElementById('classtitle').innerText = day == 4 ? "God helg! 🎉" : "God kveld!"
+							let tomorrow = data.days[day + 1], homeworkTomorrow = tomorrow && tomorrow ? tomorrow.topics.map(t => t.homework.map(h => "<b>" + t.name + ":</b> " + formatXML(h))).flat(Infinity) : []
+							document.getElementById('messages').innerHTML = homeworkTomorrow.length ? "<b>Lekser til i morgen:</b><br/>" + homeworkTomorrow.join("<br/>") : ""
 							document.getElementById('mainbody').style = otherColors + colors.Vanilla
 						}
 					}
 				} else { // time
 					document.getElementById('classtitle').innerText = classnow.name
-					document.getElementById('classtime').innerText = msToTime(now - classnow.timeStart, true) + " - " + msToTime(classnow.timeEnd - now, true)
-					document.getElementById('classhomework').innerHTML = classnow.homework.map(h => h.replace(/</g, "&lt;").replace(/>/g, "$gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/&/g, "&amp;")).join("<br/>");
-					document.getElementById('nextclass').innerText = today.topics[today.topics.indexOf(classnow) + 1] ? "Neste er " + topics[topics.indexOf(classnow) + 1].name : ""
+					document.getElementById('messages').innerText = msToTime(now - classnow.timeStart, true) + " passert  -  " + msToTime(classnow.timeEnd - now, true) + (today.topics[today.topics.indexOf(classnow) + 1] ? " til " + today.topics[today.topics.indexOf(classnow) + 1].name : " gjenstår")
 					document.getElementById('mainbody').style = otherColors + (colors[classnow.name] || colors.Vanilla)
 				}
 			}
@@ -149,6 +141,10 @@
 	            tdt.setMonth(0, 1 + ((4 - tdt.getDay()) + 7) % 7);
 		    }
 		    return 1 + Math.ceil((firstThursday - tdt) / 604800000);
+		}
+		
+		function formatXML(text) {
+			return text.replace(/</g, "&lt;").replace(/>/g, "$gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/&/g, "&amp;");
 		}
 	</script>
 </body>
