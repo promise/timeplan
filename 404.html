@@ -12,9 +12,11 @@
 </head>
 <body>
 	<main id="mainbody" style="background: #485564; color: #FAFAFA;">
-		<div class="classtitle" id="classtitle">Laster...</div>
-		<div class="classtime" id="classtime"></div>
-		
+		<div class="details" id="datetoday"></div>
+		<div class="title" id="classtitle">Laster...</div>
+		<div class="details" id="classtime"></div>
+		<div class="details" id="classhomework"></div>
+		<div class="details" id="nextclass"></div>
 	</main>
 	
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -45,7 +47,7 @@
 			document.getElementById('classtime').innerText = "Dette klasserommet eksisterer ikke!"
 			document.getElementById('mainbody').style = otherColors + colors.Feil
 			return;
-		}, 500); else fetchData() && setInterval(fetchData, 60000);
+		}, 500); else fetchData();
 
 		function fetchData() {
 			return $.ajax({
@@ -55,7 +57,7 @@
 				success: raw => {
 					data = raw;
 					update(); // vi oppdaterer så raskt som mulig
-					setTimeout(fetchData, 300000) // hvis ukeplanen endres vil vi ha endringene
+					setTimeout(fetchData, 60000) // hvis ukeplanen endres vil vi ha endringene
 				},
 				error: () => {
 					setTimeout(fetchData, 5000) // vi prøver på nytt
@@ -73,10 +75,14 @@
 
 			let today = data.days[day];
 			if (!today) { // helg
+				document.getElementById('datetoday').innerText = ""
 				document.getElementById('classtitle').innerText = "Det er helg 🎉"
 				document.getElementById('classtime').innerText = ""
+				document.getElementById('classhomework').innerHTML = ""
+				document.getElementById('nextclass').innerText = ""
 				document.getElementById('mainbody').style = otherColors + colors.Vanilla
 			} else { // ikke helg
+				document.getElementById('datetoday').innerText = today.title
 				let classnow = today.topics.find(t => t.timeStart < now && now < t.timeEnd)
 				if (!classnow) { // ikke time
 					let start = today.topics[0].timeStart, end = today.topics[today.topics.length - 1].timeEnd;
@@ -84,6 +90,8 @@
 						for (let topic of today.topics) if (now < topic.timeEnd) {
 							document.getElementById('classtitle').innerText = "Friminutt! Neste er " + topic.name
 							document.getElementById('classtime').innerText = topic.time[0] + " - " + msToTime(topic.timeStart - now, true)
+							document.getElementById('classhomework').innerHTML = topic.homework.map(h => h.replace(/</g, "&lt;").replace(/>/g, "$gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/&/g, "&amp;")).join("<br/>");
+							document.getElementById('nextclass').innerText = ""
 							document.getElementById('mainbody').style = otherColors + colors.Friminutt
 							break;
 						}
@@ -92,6 +100,7 @@
 							let topic = today.topics[0]
 							document.getElementById('classtitle').innerText = "God morgen! Første time er " + topic.name
 							document.getElementById('classtime').innerText = topic.time[0] + " - " + msToTime(topic.timeStart - now, true)
+							document.getElementById('classhomework').innerHTML = topic.homework.map(h => h.replace(/</g, "&lt;").replace(/>/g, "$gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/&/g, "&amp;")).join("<br/>");
 							document.getElementById('mainbody').style = otherColors + (colors[topic.name] || colors.Vanilla)
 						} else { // etter skolen
 							document.getElementById('classtitle').innerText = "God kveld!"
@@ -102,6 +111,8 @@
 				} else { // time
 					document.getElementById('classtitle').innerText = classnow.name
 					document.getElementById('classtime').innerText = msToTime(now - classnow.timeStart, true) + " - " + msToTime(classnow.timeEnd - now, true)
+					document.getElementById('classhomework').innerHTML = classnow.homework.map(h => h.replace(/</g, "&lt;").replace(/>/g, "$gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/&/g, "&amp;")).join("<br/>");
+					document.getElementById('nextclass').innerText = topics[topics.indexOf(classnow) + 1] ? "Neste er " + topics[topics.indexOf(classnow) + 1].name : ""
 					document.getElementById('mainbody').style = otherColors + (colors[classnow.name] || colors.Vanilla)
 				}
 			}

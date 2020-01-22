@@ -65,18 +65,18 @@ main {
 	text-align: center;
 }
 
-main > .classtitle {
+main > .title {
 	font-family: 'Reem Kufi', sans-serif;
 	font-size: 3.75em;
 	font-weight: 600;
 }
 
-main > .classtime {
+main > .details {
 	font-size: 1.5rem;
 	margin: 1.5rem 0;
 	font-weight: 100;
 }
 
-main > .classtime > a {
+main > .details > a {
 	color: #8bcef8
 }
