@@ -112,7 +112,7 @@
 					document.getElementById('classtitle').innerText = classnow.name
 					document.getElementById('classtime').innerText = msToTime(now - classnow.timeStart, true) + " - " + msToTime(classnow.timeEnd - now, true)
 					document.getElementById('classhomework').innerHTML = classnow.homework.map(h => h.replace(/</g, "&lt;").replace(/>/g, "$gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/&/g, "&amp;")).join("<br/>");
-					document.getElementById('nextclass').innerText = topics[topics.indexOf(classnow) + 1] ? "Neste er " + topics[topics.indexOf(classnow) + 1].name : ""
+					document.getElementById('nextclass').innerText = today.topics[today.topics.indexOf(classnow) + 1] ? "Neste er " + topics[topics.indexOf(classnow) + 1].name : ""
 					document.getElementById('mainbody').style = otherColors + (colors[classnow.name] || colors.Vanilla)
 				}
 			}
