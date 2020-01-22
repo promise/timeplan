@@ -120,10 +120,10 @@
 			sec = Math.floor(minutesms / 1000);
 
 			let times = [];
-			if (days) times.push(days + " dager")
-			if (hours) times.push(hours + " timer")
-			if (minutes) times.push(minutes + (short ? " min" : " minutter"))
-			if (sec) times.push(sec + (short ? " sek" : " sekunder"))
+			if (days) times.push(days + (days == 1 ? " dag" : " dager"))
+			if (hours) times.push(hours + (hours == 1 ? " time" : " timer"))
+			if (minutes) times.push(minutes + (short ? " min" : (minutes == 1 ? " minutt" : " minutter")))
+			if (sec && !(minutes || hours || days)) times.push(sec + (short ? " sek" : (sec == 1 ? " sekund" : " sekunder")))
 
 			if (!times.length) times.push(0 + (short ? " sek" : " sekunder"))
 
