@@ -102,7 +102,7 @@
 				} else { // time
 					document.getElementById('classtitle').innerText = classnow.name
 					document.getElementById('classtime').innerText = msToTime(now - classnow.timeStart, true) + " - " + msToTime(classnow.timeEnd - now, true)
-					document.getElementById('mainbody').style = otherColors + (colors[topic.name] || colors.Vanilla)
+					document.getElementById('mainbody').style = otherColors + (colors[classnow.name] || colors.Vanilla)
 				}
 			}
 		}
