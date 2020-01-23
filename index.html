@@ -62,14 +62,15 @@
           "Utdanningsvalg": "BAAADD",
           "Musikk": "BEAADD",
           "Mat og helse": "DDAACA",
-          "KRLE": "DDCCAA",
+          "KRLE": "DDDAAA",
           "Friminutt": "DDDDDD",
           "Vanilla": "FAFAFA",
           "Feil": "FF9999"
         }, classes = ["8A", "8B", "8C", "8D", "8E", "9A", "9B", "9C", "9D", "9E", "10A", "10B", "10C", "10D", "10E"],
         otherColors = "background:#485564;color:#",
         classMatches = window.location.hash ? window.location.hash.match(/[0-9][0-9]?[A-E]/gmi) : undefined,
-        data = { loading: null, class: classMatches && classes.includes(classMatches[0].toUpperCase()) ? classMatches[0].toUpperCase() : classMatches }
+        data = { loading: null, class: classMatches && classes.includes(classMatches[0].toUpperCase()) ? classMatches[0].toUpperCase() : classMatches },
+        offset = 0
       
       if (!data.class) {
         document.getElementById('classtitle').innerText = "Finn klasserommet ditt!"
@@ -89,7 +90,13 @@
         document.getElementById('classtitle').innerText = "Laster ...";
         document.getElementById('messages').innerText = "";
 
-        data = await fetchInfo();
+        data = await fetchInfo().catch(() => null);
+        if (!data) {
+          document.getElementById('classtitle').innerText = "Noe gikk galt ..."
+          document.getElementById('messages').innerHTML = "Dette klasserommet finnes ikke!"
+          document.getElementById('mainbody').style = otherColors + colors.Feil
+          return;
+        }
         update(); setInterval(update, 1000); setInterval(fetchInfo, 300000);
         return;
       }
@@ -107,7 +114,7 @@
       function update() {
           if (data.loading) return; // vi venter til den er ferdig lastet
 
-          let date = new Date(), day = date.getDay() - 1, now = Date.now();
+          let date = new Date(), day = date.getDay() - 1, now = Date.now() + offset;
           if (day == -1) day = 6;
 
           let today = data.days[day];
@@ -143,7 +150,8 @@
               }
             } else { // time nå
               document.getElementById('classtitle').innerText = classnow.name
-              document.getElementById('messages').innerText = msToTime(now - classnow.timeStart, true) + " passert  -  " + msToTime(classnow.timeEnd - now, true) + (today.topics[today.topics.indexOf(classnow) + 1] ? " til " + today.topics[today.topics.indexOf(classnow) + 1].name : " gjenstår")
+              let next = today.topics.find(topic => topic.timeStart == classnow.timeEnd), nextTopic = today.topics[today.topics.indexOf(classnow) + 1]
+              document.getElementById('messages').innerText = msToTime(now - classnow.timeStart, true) + " passert  -  " + msToTime(classnow.timeEnd - now, true) + " gjenstår" + (nextTopic ? " til " + (next ? next.name : "friminutt") : "")
               document.getElementById('mainbody').style = otherColors + (colors[classnow.name] || colors.Vanilla)
             }
           }
