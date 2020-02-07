@@ -72,7 +72,14 @@
         otherColors = "background:#485564;color:#",
         classMatches = window.location.hash ? window.location.hash.match(/[0-9][0-9]?[A-E]/gmi) : undefined,
         data = { loading: null, class: classMatches && classes.includes(classMatches[0].toUpperCase()) ? classMatches[0].toUpperCase() : classMatches },
+		date = new Date(),
+		day = date.getDay() !== 0 ? date.getDay() - 1 : 6,
         offset = 0
+		
+	  setInterval(() => {
+		let newDate = new Date(), newDay = newDate.getDay() !== 0 ? newDate.getDay() - 1 : 6;
+		if (newDay !== day) window.location.reload()
+	  }, 60000) // vi sjekker om det er en ny dag, for å oppdatere koden
       
       if (!data.class) {
         document.getElementById('classtitle').innerText = "Finn klasserommet ditt!"
@@ -92,15 +99,25 @@
         document.getElementById('classtitle').innerText = "Laster ...";
         document.getElementById('messages').innerText = "";
 
-        data = await fetchInfo().catch(() => null);
-        if (!data) {
+        try { data = await fetchInfo().catch(e => e); console.log(data); } catch(e) {}
+        if (data.error && (data.class == undefined || data.class)) {
           document.getElementById('classtitle').innerText = "Noe gikk galt ..."
-          document.getElementById('messages').innerHTML = "Dette klasserommet finnes ikke!"
+          document.getElementById('messages').innerHTML = "Prøv igjen senere!"
           document.getElementById('mainbody').style = otherColors + colors.Feil
           return;
-        }
-        update(); setInterval(update, 1000); setInterval(fetchInfo, 300000);
-        return;
+        } else if (data.error && data.class == false) {
+		  document.getElementById('classtitle').innerText = "Noe gikk galt ..."
+          document.getElementById('messages').innerHTML = "Dette klasserommet eksisterer ikke!"
+          document.getElementById('mainbody').style = otherColors + colors.Feil
+          return;
+		}
+		
+        update(); setInterval(update, 1000);
+		
+		setInterval(async () => {
+			let newData = fetchInfo.catch(e => e);
+			if (!(data.fail || data.error)) data = newData;
+		}, 300000);
       }
 
       function fetchInfo() {
@@ -116,8 +133,7 @@
       function update() {
           if (data.loading) return; // vi venter til den er ferdig lastet
 
-          let date = new Date(), day = date.getDay() - 1, now = Date.now() + offset;
-          if (day == -1) day = 6;
+          let now = Date.now() + offset;
 
           let today = data.days[day];
           if (!today) { // helg sannsynligvis
