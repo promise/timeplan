@@ -84,3 +84,17 @@ main > .details > a {
 main > .footer > a {
 	color: #8bcef8
 }
+
+/* Social Icons */
+
+.footer > .icon {
+	color: #FAFAFA;
+}
+
+.footer > .icon > a svg path {
+	fill: #FAFAFA;
+}
+
+.footer > .icon > i {
+	font-size: 1em;
+}
