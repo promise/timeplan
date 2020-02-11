@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-		<title>Timeplan, men den fungerer faktisk</title>
+	<title>Timeplan, men den fungerer faktisk</title>
 
-		<link href="https://fonts.googleapis.com/css?family=Reem+Kufi|Roboto:300" rel="stylesheet">
-		<link rel="stylesheet" href="main.css">
+	<link href="https://fonts.googleapis.com/css?family=Reem+Kufi|Roboto:300" rel="stylesheet">
+	<link rel="stylesheet" href="main.css">
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -30,26 +30,26 @@
 	<meta name="theme-color" content="#485564">
     <script> if ("serviceWorker" in navigator && !navigator.serviceWorker.controller) navigator.serviceWorker.register("pwa.js", { scope: "./" }) .then(reg => console.log("[PWA] Service worker has been registered for scope: " + reg.scope)); </script>
 
-		<!-- Global site tag (gtag.js) - Google Analytics -->
-		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-153861801-5"></script>
-		<script>
-			window.dataLayer = window.dataLayer || [];
-			function gtag(){dataLayer.push(arguments);}
-			gtag('js', new Date());
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-153861801-5"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
 
-			gtag('config', 'UA-153861801-5');
-		</script>
-	</head>
-	<body>
-		<main style="background:#485564;color:#FAFAFA" id="mainbody">
-			<div class="details" id="datetoday"></div>
-			<div class="title" id="classtitle">Laster...</div>
-			<div class="details" id="messages"></div>
-      <div class="footer" style="position:fixed;left:0;bottom:0;width:100%;text-align:right;padding:5px;"><a href="/">timeplan.but-it-actually.works</a> <a class="icon" href="//www.linkedin.com/in/galudvigsen/"><i class="fab fa-linkedin"></i></a></div>
-		</main>
-		<script>
-			window.location.hash = "#" + window.location.pathname.replace("/", "");
-			window.location.pathname = "";
-		</script>
-	</body>
+		gtag('config', 'UA-153861801-5');
+	</script>
+  </head>
+  <body>
+	<main style="background:#485564;color:#FAFAFA" id="mainbody">
+		<div class="details" id="datetoday"></div>
+		<div class="title" id="classtitle">Laster...</div>
+		<div class="details" id="messages"></div>
+  <div class="footer" style="position:fixed;left:0;bottom:0;width:100%;text-align:right;padding:5px;"><a href="/">timeplan.but-it-actually.works</a> <a class="icon" href="//www.linkedin.com/in/galudvigsen/"><i class="fab fa-linkedin"></i></a></div>
+	</main>
+	<script>
+		window.location.hash = "#" + window.location.pathname.replace("/", "");
+		window.location.pathname = "";
+	</script>
+  </body>
 </html>
