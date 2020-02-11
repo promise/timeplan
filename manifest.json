@@ -6,7 +6,8 @@
   "background_color": "#485564",
   "theme_color": "#FAFAFA",
   "direction": "ltr",
-  "display": "fullscreen"
+  "display": "fullscreen",
+  "start_url": "/?utm_source=homescreen",
   "icons": [
 	{
 		"src": "/icons/android-chrome-36x36.png?v=1581413214893",
