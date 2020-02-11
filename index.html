@@ -149,14 +149,14 @@
               if (start < now && now < end) { // pause sannsynligvis
                 for (let topic of today.topics) if (now < topic.timeEnd) {
                   document.getElementById('classtitle').innerText = "Friminutt!"
-                  document.getElementById('messages').innerText = msToTime(topic.timeStart - now, true) + " til " + topic.name
+                  document.getElementById('messages').innerText = msToTime(topic.timeStart - now, true, true) + " til " + topic.name
                   document.getElementById('mainbody').style = otherColors + colors.Friminutt
                   break;
                 }
               } else { // ikke pause sannsynligvis, heller før eller etter skolen
                 if (start >= now) { // før skolen
                   let topic = today.topics[0]
-                  document.getElementById('classtitle').innerText = "God morgen! Første time er " + topic.name + " om " + msToTime(topic.timeStart - now, true)
+                  document.getElementById('classtitle').innerText = "God morgen! Første time er " + topic.name + " om " + msToTime(topic.timeStart - now, true, true)
                   document.getElementById('messages').innerHTML = data.messages.map(m => formatXML(m)).join("<br/>")
                   document.getElementById('mainbody').style = otherColors + (colors[topic.name] || colors.Vanilla)
                 } else { // etter skolen
@@ -169,13 +169,13 @@
             } else { // time nå
               document.getElementById('classtitle').innerText = classnow.name
               let next = today.topics.find(topic => topic.timeStart == classnow.timeEnd), nextTopic = today.topics[today.topics.indexOf(classnow) + 1]
-              document.getElementById('messages').innerText = msToTime(now - classnow.timeStart, true) + " passert  -  " + msToTime(classnow.timeEnd - now, true) + " gjenstår" + (nextTopic ? " til " + (next ? next.name : "friminutt") : "")
+              document.getElementById('messages').innerText = msToTime(now - classnow.timeStart, true) + " passert  -  " + msToTime(classnow.timeEnd - now, true, true) + " gjenstår" + (nextTopic ? " til " + (next ? next.name : "friminutt") : "")
               document.getElementById('mainbody').style = otherColors + (colors[classnow.name] || colors.Vanilla)
             }
           }
         }
         
-        function msToTime(ms, short = false) {
+        function msToTime(ms, short = false, roundUp = false) {
           days = Math.floor(ms / 86400000); // 24*60*60*1000
           daysms = ms % 86400000; // 24*60*60*1000
           hours = Math.floor(daysms / 3600000); // 60*60*1000
@@ -187,7 +187,7 @@
           let times = [];
           if (days) times.push(days + (days == 1 ? " dag" : " dager"))
           if (hours) times.push(hours + (hours == 1 ? " time" : " timer"))
-          if (minutes) times.push(minutes + (short ? " min" : (minutes == 1 ? " minutt" : " minutter")))
+          if (minutes) times.push((roundUp && sec ? minutes + 1 : minutes) + (short ? " min" : (minutes == 1 ? " minutt" : " minutter")))
           if (sec && !(minutes || hours || days)) times.push(sec + (short ? " sek" : (sec == 1 ? " sekund" : " sekunder")))
 
           if (!times.length) times.push(0 + (short ? " sek" : " sekunder"))
