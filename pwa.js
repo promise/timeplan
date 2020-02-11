@@ -1,4 +1,4 @@
-const CACHE = "pwa", offlineFallbackPage = "offline";
+const CACHE = "pwa", offlineFallbackPage = "server_offline";
 
 self.addEventListener("install", event => event.waitUntil(caches.open(CACHE).then(cache => cache.add(offlineFallbackPage))));
 
