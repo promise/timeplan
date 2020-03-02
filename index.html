@@ -14,23 +14,25 @@
     <meta name="msapplication-starturl" content="/">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	
-	<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet">
+	  <link href="//use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet">
 
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png?v=1581413214893">
-	<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png?v=1581413214893">
-	<link rel="icon" type="image/png" sizes="192x192" href="/icons/android-chrome-192x192.png?v=1581413214893">
-	<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png?v=1581413214893">
-	<link rel="mask-icon" href="/icons/safari-pinned-tab.svg?v=1581413214893" color="#485564">
-	<link rel="shortcut icon" href="/icons/favicon.ico?v=1581413214893">
-	<meta name="msapplication-TileColor" content="#485564">
-	<meta name="msapplication-TileImage" content="/icons/mstile-144x144.png?v=1581413214893">
-	<meta name="msapplication-config" content="/icons/browserconfig.xml?v=1581413214893">
-	<meta name="theme-color" content="#485564">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png?v=1581413214893">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/android-chrome-192x192.png?v=1581413214893">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png?v=1581413214893">
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg?v=1581413214893" color="#485564">
+    <link rel="shortcut icon" href="/icons/favicon.ico?v=1581413214893">
+    <meta name="msapplication-TileColor" content="#485564">
+    <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png?v=1581413214893">
+    <meta name="msapplication-config" content="/icons/browserconfig.xml?v=1581413214893">
+    <meta name="theme-color" content="#485564">
+
+    <!-- Progressive Web App Service Worker -->
     <script> if ("serviceWorker" in navigator && !navigator.serviceWorker.controller) navigator.serviceWorker.register("pwa.js", { scope: "./" }) .then(reg => console.log("[PWA] Service worker has been registered for scope: " + reg.scope)); </script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-153861801-5"></script>
+    <script async src="//www.googletagmanager.com/gtag/js?id=UA-153861801-5"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -44,13 +46,12 @@
       <div class="details" id="datetoday"></div>
       <div class="title" id="classtitle">Laster ...</div>
       <div class="details" id="messages"></div>
-      <div class="footer" style="position:fixed;left:0;bottom:0;width:100%;text-align:right;padding:5px;"><a href="/">timeplan.but-it-actually.works</a> <a class="icon" href="//www.linkedin.com/in/galudvigsen/"><i class="fab fa-linkedin"></i></a></div>
+      <div class="footer" style="position:fixed;left:0;bottom:0;width:100%;text-align:right;padding:5px;"><a href="/">timeplan.but-it-actually.works</a> <a class="icon" href="//www.linkedin.com/in/galudvigsen/"><i class="fab fa-linkedin"></i></a> <a class="icon" href="//www.github.com/kjellervolla/timeplan/"><i class="fab fa-github"></i></a></div>
     </main>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>
-      let
-        colors = {
+      const
+        colors = { // colors for the different topics
           "Naturfag": "AADDAA",
           "Kroppsøving": "AADDDD",
           "Samfunnsfag": "DDCCAA",
@@ -67,149 +68,121 @@
           "Friminutt": "DDDDDD",
           "Vanilla": "FAFAFA",
           "Feil": "FF9999"
-        }, classes = ["8A", "8B", "8C", "8D", "8E", "9A", "9B", "9C", "9D", "9E", "10A", "10B", "10C", "10D", "10E"],
-        otherColors = "background:#485564;color:#",
-        classMatches = window.location.hash ? window.location.hash.match(/[0-9][0-9]?[A-E]/gmi) : undefined,
-        data = { loading: null, class: classMatches && classes.includes(classMatches[0].toUpperCase()) ? classMatches[0].toUpperCase() : classMatches },
-		date = new Date(),
-		day = date.getDay() !== 0 ? date.getDay() - 1 : 6,
-        offset = 0
-		
-	  setInterval(() => {
-		let newDate = new Date(), newDay = newDate.getDay() !== 0 ? newDate.getDay() - 1 : 6;
-		if (newDay !== day) window.location.reload()
-	  }, 60000) // vi sjekker om det er en ny dag, for å oppdatere koden
+        },
+        classes = ["8A", "8B", "8C", "8D", "8E", "9A", "9B", "9C", "9D", "9E", "10A", "10B", "10C", "10D", "10E"]
+        defaultStyle = "background:#485564;color:#",
+        classFromHash = window.location.hash ? window.location.hash.replace("#", "") : null,
+        data = { loading: null, class: classFromHash && classes.includes(classFromHash.toUpperCase()) ? classFromHash.toUpperCase() : null },
+        day = ((new Date()).getDay() || 7) - 1,
+        offset = 0 // debug
+      
+      // if it's a new day, we reload the website to fetch new updates it might have
+      setInterval(() => (((new Date()).getDay() || 7) - 1) !== day ? window.location.reload() : null, 60000)
       
       if (!data.class) {
-        document.getElementById('classtitle').innerText = "Finn klasserommet ditt!"
-        document.getElementById('messages').innerHTML = classes.map(cl => "<a href=\"#" + cl + "\" onclick=\"updateClass()\">" + cl + "</a>").join(" - ")
+        document.getElementById("classtitle").innerText = "Finn klasserommet ditt!"; // "Find your classroom!"
+        document.getElementById("messages").innerHTML = classes.map(cl => "<a href=\"#" + cl + "\" onclick=\"updateClass(\\\"" + cl + "\\\")\">" + cl + "</a>").join(" - ")
       } else startSequence();
       
-      async function updateClass() {
-        await new Promise(resolve => setInterval(resolve, 1)) // vi venter bittelitt så window.location har oppdatert seg
-        classMatches = window.location.hash ? window.location.hash.match(/[0-9][0-9]?[A-E]/gmi) : undefined;
-        data.class = classMatches ? classMatches[0] : classMatches;
-
-        if (data.class) startSequence();
-        return data.class;
+      function updateClass(cl) {
+        classMatches = cl;
+        data.class = cl;
+      
+        return startSequence();
       }
-
+      
       async function startSequence() {
-        document.getElementById('classtitle').innerText = "Laster ...";
-        document.getElementById('messages').innerText = "";
-
-        try { data = await fetchInfo().catch(e => e); console.log(data); } catch(e) {}
-        if (data.error && (data.class == undefined || data.class)) {
-          document.getElementById('classtitle').innerText = "Noe gikk galt ..."
-          document.getElementById('messages').innerHTML = "Prøv igjen senere!"
-          document.getElementById('mainbody').style = otherColors + colors.Feil
-          return;
-        } else if (data.error && data.class == false) {
-		  document.getElementById('classtitle').innerText = "Noe gikk galt ..."
-          document.getElementById('messages').innerHTML = "Dette klasserommet eksisterer ikke!"
-          document.getElementById('mainbody').style = otherColors + colors.Feil
-          return;
-		}
-		
-        update(); setInterval(update, 1000);
-		
-		setInterval(async () => {
-			let newData = fetchInfo.catch(e => e);
-			if (!(data.fail || data.error)) data = newData;
-		}, 300000);
+        document.getElementById("classtitle").innerHTML = "Laster ..."; // "Loading ..."
+        document.getElementById("messages").innerText = "";
+        
+        data = await fetchInfo().catch(e => e);
+      
+        if (data.error) {
+          document.getElementById("classtitle").innerText = "Noe gikk galt ..."; // "Something went wrong ..."
+          document.getElementById("messages").innerText = data.message || "Prøv igjen senere!"; // either custom response from the server, or "Try again later!"
+          document.getElementById("mainbody").style = defaultStyle + colors["Feil"] // feil = fault
+        } else {
+          update();
+          setInterval(update, 1000);
+      
+          setInterval(async () => {
+            let newData = await fetchInfo().catch(e => e);
+            if (!data.error) data = newData;
+          }, 300000)
+        }
       }
-
+      
       function fetchInfo() {
         return new Promise((resolve, reject) => $.ajax({
           url: "https://skkvapi.but-it-actually.works/timeplan/" + data.class,
           type: "GET",
-          dataType: 'json',
+          dataType: "json",
           success: resolve,
           error: reject
         }))
       }
-
+      
       function update() {
-          if (data.loading) return; // vi venter til den er ferdig lastet
-
-          let now = Date.now() + offset;
-
-          let today = data.days[day];
-          if (!today) { // helg sannsynligvis
-            document.getElementById('datetoday').innerText = ""
-            document.getElementById('classtitle').innerText = "Det er helg 🎉"
-            document.getElementById('messages').innerText = ""
-            document.getElementById('mainbody').style = otherColors + colors.Vanilla
-          } else { // skole
-            document.getElementById('datetoday').innerText = today.title + ", uke " + ISO8601_week_no(new Date())
-            let classnow = today.topics.find(t => t.timeStart < now && now < t.timeEnd);
-            if (!classnow) { // ikke time atm
-              let start = today.topics[0].timeStart, end = today.topics[today.topics.length - 1].timeEnd;
-              if (start < now && now < end) { // pause sannsynligvis
-                for (let topic of today.topics) if (now < topic.timeEnd) {
-                  document.getElementById('classtitle').innerText = "Friminutt!"
-                  document.getElementById('messages').innerText = msToTime(topic.timeStart - now, true, true) + " til " + topic.name
-                  document.getElementById('mainbody').style = otherColors + colors.Friminutt
-                  break;
-                }
-              } else { // ikke pause sannsynligvis, heller før eller etter skolen
-                if (start >= now) { // før skolen
-                  let topic = today.topics[0]
-                  document.getElementById('classtitle').innerText = "God morgen! Første time er " + topic.name + " om " + msToTime(topic.timeStart - now, true, true)
-                  document.getElementById('messages').innerHTML = data.messages.map(m => formatXML(m)).join("<br/>")
-                  document.getElementById('mainbody').style = otherColors + (colors[topic.name] || colors.Vanilla)
-                } else { // etter skolen
-                  document.getElementById('classtitle').innerText = day == 4 ? "God helg! 🎉" : "God kveld!"
-                  let tomorrow = data.days[day + 1], homeworkTomorrow = tomorrow && tomorrow ? tomorrow.topics.map(t => t.homework.map(h => "<b>" + t.name + ":</b> " + formatXML(h))).flat(Infinity) : []
-                  document.getElementById('messages').innerHTML = homeworkTomorrow.length ? "<b>Lekser til i morgen:</b><br/>" + homeworkTomorrow.join("<br/>") : ""
-                  document.getElementById('mainbody').style = otherColors + colors.Vanilla
-                }
+        if (data.loading) return;
+      
+        let now = Date.now() + offset, today = data.days[day];
+        if (!today) { // probably weekend
+          document.getElementById("datetoday").innerText = "";
+          document.getElementById("classtitle").innerText = "Det er helg! 🎉"; // "Weekend! 🎉"
+          document.getElementById("messages").innerText = "";
+          document.getElementById("mainbody").style = defaultStyle + colors["Vanilla"]
+        } else { // school today
+          document.getElementById("datetoday").innerText = today.title + ", uke " + data.week // "<date>, week <week>"
+          let classnow = today.topics.find(t => t.timeStart < now && now < t.timeEnd);
+          if (!classnow) { // not a class right now
+            let start = today.topics[0].timeStart, end = today.topics[today.topics.length - 1].timeEnd;
+            if (start < now && now < end) { // probably a break right now
+              let classnext = today.topics.find(t => now < t.timeEnd);
+              document.getElementById("classtitle").innerText = "Friminutt!";
+              document.getElementById("messages").innerText = msToTime(classnext.timeStart - now, true) + " til " + classnext.name;
+              document.getElementById("mainbody").style = defaultStyle + colors["Friminutt"]
+            } else { // not school right now, either before or after
+              if (start >= now) { // before school
+                let classnext = today.topics[0]
+                document.getElementById("classtitle").innerText = "God morgen! Første time er " + classnext.name + " om " + msToTime(classnext.timeStart - now, true)
+                document.getElementById("messages").innerHTML = data.messages.map(m => m.replace(/&/g, "&amp;")).join("<br/>");
+                document.getElementById("mainbody").style = defaultStyle + (colors[classnext.name] || colors["Vanilla"])
+              } else { // after school
+                document.getElementById("classtitle").innerText = day == 4 ? "God helg! 🎉" : "God kveld!";
+                let tomorrow = data.days[day + 1], homeworkTomorrow = [];
+                if (tomorrow) tomorrow.topics.forEach(t => t.homework.forEach(h => homeworkTomorrow.push("<b>" + t.name + ":</b> " + h.replace(/&/g, "&amp;"))))
+                document.getElementById("messages").innerHTML = homeworkTomorrow.length ? "<b>Lekser til i morgen:</b><br/>" + homeworkTomorrow.join("<br/>") : "";
+                document.getElementById("mainbody").style = defaultStyle + colors["Vanilla"];
               }
-            } else { // time nå
-              document.getElementById('classtitle').innerText = classnow.name
-              let next = today.topics.find(topic => topic.timeStart == classnow.timeEnd), nextTopic = today.topics[today.topics.indexOf(classnow) + 1]
-              document.getElementById('messages').innerText = msToTime(now - classnow.timeStart, true) + " passert  -  " + msToTime(classnow.timeEnd - now, true, true) + " gjenstår" + (nextTopic ? " til " + (next ? next.name : "friminutt") : "")
-              document.getElementById('mainbody').style = otherColors + (colors[classnow.name] || colors.Vanilla)
             }
+          } else { // class right now
+            document.getElementById("classtitle").innerText = classnow.name;
+            let next = today.topics.find(topic => topic.timeStart == classnow.timeEnd), nextTopic = today.topics[today.topics.indexOf(classnow) + 1]
+            document.getElementById("messages").innerHTML = (classnow.info.length ? "<b>" + classnow.info.replace(/&/g, "&amp;") + "</b><br/>" : "") + msToTime(now - classnow.timeStart, true) + " passert • " + msToTime(classnow.timeEnd - now, true) + " gjenstår" + (nextTopic ? " til " + (next ? next.name : "friminutt") : "")
+            document.getElementById("mainbody").style = defaultStyle + (colors[classnow.name] || colors["Vanilla"])
           }
         }
-        
-        function msToTime(ms, short = false, roundUp = false) {
-          days = Math.floor(ms / 86400000); // 24*60*60*1000
-          daysms = ms % 86400000; // 24*60*60*1000
-          hours = Math.floor(daysms / 3600000); // 60*60*1000
-          hoursms = ms % 3600000; // 60*60*1000
-          minutes = Math.floor(hoursms / 60000); // 60*1000
-          minutesms = ms % 60000; // 60*1000
-          sec = Math.floor(minutesms / 1000);
-
-          let times = [];
-          if (days) times.push(days + (days == 1 ? " dag" : " dager"))
-          if (hours) times.push(hours + (hours == 1 ? " time" : " timer"))
-          if (minutes) times.push((roundUp && sec ? minutes + 1 : minutes) + (short ? " min" : (minutes == 1 ? " minutt" : " minutter")))
-          if (sec && !(minutes || hours || days)) times.push(sec + (short ? " sek" : (sec == 1 ? " sekund" : " sekunder")))
-
-          if (!times.length) times.push(0 + (short ? " sek" : " sekunder"))
-
-          return times.join(", ")
-        }
-        
-        // https://ukeplan.lillestrom.kommune.no/js/site.js
-        function ISO8601_week_no(dt) {
-            var tdt = new Date(dt.valueOf());
-            var dayn = (dt.getDay() + 6) % 7;
-            tdt.setDate(tdt.getDate() - dayn + 3);
-            var firstThursday = tdt.valueOf();
-            tdt.setMonth(0, 1);
-            if (tdt.getDay() !== 4) {
-                  tdt.setMonth(0, 1 + ((4 - tdt.getDay()) + 7) % 7);
-            }
-            return 1 + Math.ceil((firstThursday - tdt) / 604800000);
-        }
-        
-        function formatXML(text) {
-          return text.replace(/&/g, "&amp;");
-        }
+      }
+      
+      function msToTime(ms, roundUp = false) {
+        days = Math.floor(ms / 86400000); // 24*60*60*1000
+        daysms = ms % 86400000; // 24*60*60*1000
+        hours = Math.floor(daysms / 3600000); // 60*60*1000
+        hoursms = ms % 3600000; // 60*60*1000
+        minutes = Math.floor(hoursms / 60000); // 60*1000
+        minutesms = ms % 60000; // 60*1000
+        sec = Math.floor(minutesms / 1000);
+      
+        let times = [];
+        if (days) times.push(days + (days == 1 ? " dag" : " dager"))
+        if (hours) times.push(hours + (hours == 1 ? " time" : " timer"))
+        if (minutes) times.push((roundUp && sec ? minutes + 1 : minutes) + " min")
+        if (sec && !(minutes || hours || days)) times.push(sec + " sek")
+      
+        if (!times.length) times.push("0 sek")
+      
+        return times.join(", ")
+      }
     </script>
   </body>
 </html>
