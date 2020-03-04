@@ -81,7 +81,7 @@
       
       if (!data.class) {
         document.getElementById("classtitle").innerText = "Finn klasserommet ditt!"; // "Find your classroom!"
-        document.getElementById("messages").innerHTML = classes.map(cl => "<a href=\"#" + cl + "\" onclick=\"updateClass(\\\"" + cl + "\\\")\">" + cl + "</a>").join(" - ")
+        document.getElementById("messages").innerHTML = classes.map(cl => "<a href=\"#" + cl + "\" onclick=\"updateClass(\'" + cl + "\')\">" + cl + "</a>").join(" - ")
       } else startSequence();
       
       function updateClass(cl) {
