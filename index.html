@@ -158,13 +158,15 @@
           } else { // class right now
             document.getElementById("classtitle").innerText = classnow.name;
             let next = today.topics.find(topic => topic.timeStart == classnow.timeEnd), nextTopic = today.topics[today.topics.indexOf(classnow) + 1]
-            document.getElementById("messages").innerHTML = (classnow.info.length ? "<b>" + classnow.info.replace(/&/g, "&amp;") + "</b><br/>" : "") + msToTime(now - classnow.timeStart, true) + " passert • " + msToTime(classnow.timeEnd - now, true) + " gjenstår" + (nextTopic ? " til " + (next ? next.name : "friminutt") : "")
+            document.getElementById("messages").innerHTML = (classnow.info.length ? "<b>" + classnow.info.replace(/&/g, "&amp;") + "</b><br/>" : "") + msToTime(now - classnow.timeStart) + " passert • " + msToTime(classnow.timeEnd - now, true) + " gjenstår" + (nextTopic ? " til " + (next ? next.name : "friminutt") : "")
             document.getElementById("mainbody").style = defaultStyle + (colors[classnow.name] || colors["Vanilla"])
           }
         }
       }
       
       function msToTime(ms, roundUp = false) {
+	  if (roundUp) ms += 1000; // add a second
+	  
         days = Math.floor(ms / 86400000); // 24*60*60*1000
         daysms = ms % 86400000; // 24*60*60*1000
         hours = Math.floor(daysms / 3600000); // 60*60*1000
